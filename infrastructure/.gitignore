@@ -1,0 +1,8 @@
+# Terraform files that don't need to be added to Git
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+
+# SSH keys
+*.pem
