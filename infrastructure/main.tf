@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 5.0, < 7.0"
+
+    }
+  }
+}
 provider "aws" {
   region = "eu-central-1"
 }
@@ -77,12 +86,13 @@ resource "aws_security_group" "rds_sg" {
 }
 
 # EC2 Instance
-resource "aws_instance" "app_server" {
+resource "aws_instance" "grocerymate_ec2" {
   ami                    = "ami-015cbce10f839bd0c"
   instance_type          = "t2.micro"
   subnet_id              = data.aws_subnets.default.ids[0]
   key_name               = var.key_name
   vpc_security_group_ids = [aws_security_group.ec2_sg.id]
+  iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
 
   tags = {
     Name = "FreeTierInstance"
@@ -111,13 +121,14 @@ resource "aws_db_parameter_group" "postgres_custom_group" {
 resource "aws_db_instance" "postgres_db" {
   allocated_storage      = 20
   engine                 = "postgres"
-  engine_version         = "15.8"
+  engine_version         = "15"
   instance_class         = "db.t3.micro"
-  db_name                = "mydatabase"
+  db_name                = "grocerydb"
   username               = "adminuser"
   password               = var.db_password
   parameter_group_name   = aws_db_parameter_group.postgres_custom_group.name
   skip_final_snapshot    = true
+  publicly_accessible    = false
   vpc_security_group_ids = [aws_security_group.rds_sg.id]
   db_subnet_group_name   = aws_db_subnet_group.default.name
 
@@ -125,3 +136,4 @@ resource "aws_db_instance" "postgres_db" {
     Name = "MyPostgresDB"
   }
 }
+
