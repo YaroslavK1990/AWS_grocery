@@ -3,6 +3,8 @@
 *.tfstate
 *.tfstate.backup
 *.tfvars
+*.tfplan
+
 
 # SSH keys
 *.pem

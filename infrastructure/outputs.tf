@@ -17,3 +17,18 @@ output "iam_role_name" {
   description = "IAM Role name for EC2"
   value       = aws_iam_role.ec2_role.name
 }
+
+output "grocery_alb_dns" {
+  description = "DNS name of the grocery Application Load Balancer — public entry point for your grocery site (http://<grocery_alb_dns>)."
+  value       = aws_lb.grocery_alb.dns_name
+}
+
+output "grocery_alb_arn" {
+  description = "ARN of the grocery Application Load Balancer. Useful for IAM, CloudWatch, or integrations."
+  value       = aws_lb.grocery_alb.arn
+}
+
+output "grocery_target_group_arn" {
+  description = "ARN of the grocery Target Group that forwards requests to EC2."
+  value       = aws_lb_target_group.grocery_tg.arn
+}

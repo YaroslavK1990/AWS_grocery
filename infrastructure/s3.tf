@@ -1,6 +1,6 @@
 # S3 Bucket for storing avatars
 resource "aws_s3_bucket" "avatars" {
-  bucket        = "grocerymate-avatars-a1b2c3d4"
+  bucket        = var.s3_bucket_name
   force_destroy = true
 
   tags = {

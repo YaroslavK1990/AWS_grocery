@@ -1,0 +1,34 @@
+# Creates a launch template configuration for EC2 instances
+ in the Auto Scaling Group.
+ 
+resource "aws_launch_template" "grocery_ec2_lt" {
+  name_prefix   = "grocery-ec2-"
+  image_id      = var.ami_id
+  instance_type = var.ec2_instance_type
+  key_name      = var.key_name
+
+  vpc_security_group_ids = [aws_security_group.ec2_sg.id]
+
+  tag_specifications {
+    resource_type = "instance"
+
+    tags = {
+      Name = "grocerymate-ec2"
+    }
+  }
+}
+
+# Auto Scaling Group
+resource "aws_autoscaling_group" "grocery_asg" {
+  desired_capacity    = 1   
+  min_size            = 1   
+  max_size            = 2   
+  vpc_zone_identifier = [aws_subnet.private_a.id, aws_subnet.private_b.id]
+
+  launch_template {
+    id      = aws_launch_template.grocery_ec2_lt.id
+    version = "$Latest"
+  }
+
+  target_group_arns = [aws_lb_target_group.grocery_tg.arn]
+}

@@ -1,130 +1,100 @@
+# Description: Main Terraform configuration file for GroceryMate infrastructure.
 terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
       version = ">= 5.0, < 7.0"
-
     }
   }
 }
+
 provider "aws" {
-  region = "eu-central-1"
+  region = var.aws_region
 }
 
-# Default VPC (ensure it exists)
-resource "aws_default_vpc" "default" {
-  tags = {
-    Name = "default-vpc"
-  }
-}
-
-# Get the Default VPC explicitly
-data "aws_vpc" "default" {
-  default = true
-}
-
-# Get subnets from default VPC
-data "aws_subnets" "default" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.default.id]
-  }
-}
-
-# Security Group for EC2
-resource "aws_security_group" "ec2_sg" {
-  name        = "ec2-security-group"
-  description = "Allow inbound traffic for SSH and HTTP"
-  vpc_id      = aws_default_vpc.default.id
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["94.222.133.149/32"]
-    description = "Allow SSH inbound traffic"
-  }
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "Allow HTTP inbound traffic"
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "Allow all outbound traffic"
-  }
-}
-
-# Security Group for RDS
-resource "aws_security_group" "rds_sg" {
-  name        = "rds-security-group"
-  description = "Allow inbound traffic from EC2 for database access"
-  vpc_id      = aws_default_vpc.default.id
-
-  ingress {
-    from_port       = 5432
-    to_port         = 5432
-    protocol        = "tcp"
-    security_groups = [aws_security_group.ec2_sg.id]
-    description     = "Allow PostgreSQL access from EC2 instance"
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "Allow all outbound traffic"
-  }
-}
-
-# EC2 Instance
+# EC2 INSTANCE
 resource "aws_instance" "grocerymate_ec2" {
-  ami                    = "ami-015cbce10f839bd0c"
-  instance_type          = "t2.micro"
-  subnet_id              = data.aws_subnets.default.ids[0]
+  ami                    = var.ami_id
+  instance_type          = var.ec2_instance_type
+  subnet_id              = aws_subnet.private_a.id
   key_name               = var.key_name
   vpc_security_group_ids = [aws_security_group.ec2_sg.id]
-  iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
+  iam_instance_profile   = var.ec2_instance_profile
 
   tags = {
-    Name = "FreeTierInstance"
+    Name = "grocerymate-ec2"
   }
 
   depends_on = [aws_security_group.ec2_sg]
 }
 
-# Subnet Group for RDS
-resource "aws_db_subnet_group" "default" {
-  name       = "default-subnet-group"
-  subnet_ids = data.aws_subnets.default.ids
+# LOAD BALANCER
+resource "aws_lb" "grocery_alb" {
+  name               = "grocery-alb"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.grocery_alb_sg.id]
+  subnets            = [aws_subnet.public_a.id, aws_subnet.public_b.id]
 
-  tags = {
-    Name = "Default subnet group"
+  tags = { Name = "grocery-alb" }
+}
+
+resource "aws_lb_target_group" "grocery_tg" {
+  name     = "grocery-tg"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = aws_vpc.main.id
+
+  health_check {
+    path                = var.health_check_path
+    protocol            = "HTTP"
+    matcher             = "200"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+  }
+
+  tags = { Name = "grocery-target-group" }
+}
+
+resource "aws_lb_target_group_attachment" "ec2_attach" {
+  target_group_arn = aws_lb_target_group.grocery_tg.arn
+  target_id        = aws_instance.grocerymate_ec2.id
+  port             = 80
+}
+
+resource "aws_lb_listener" "grocery_http" {
+  load_balancer_arn = aws_lb.grocery_alb.arn
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.grocery_tg.arn
   }
 }
 
-# PostgreSQL 15
+# RDS
+resource "aws_db_subnet_group" "default" {
+  name       = "grocery-db-subnet-group"
+  subnet_ids = [aws_subnet.private_a.id, aws_subnet.private_b.id]
+
+  tags = { Name = "DB subnet group" }
+}
+
 resource "aws_db_parameter_group" "postgres_custom_group" {
   name   = "my-postgres-param-group"
   family = "postgres15"
 }
 
-# RDS Instance
 resource "aws_db_instance" "postgres_db" {
-  allocated_storage      = 20
-  engine                 = "postgres"
-  engine_version         = "15"
-  instance_class         = "db.t3.micro"
-  db_name                = "grocerydb"
-  username               = "adminuser"
+  allocated_storage      = var.db_allocated_storage
+  engine                 = var.db_engine
+  engine_version         = var.db_engine_version
+  instance_class         = var.db_instance_class
+  db_name                = var.db_name
+  username               = var.db_username
   password               = var.db_password
   parameter_group_name   = aws_db_parameter_group.postgres_custom_group.name
   skip_final_snapshot    = true
@@ -132,8 +102,5 @@ resource "aws_db_instance" "postgres_db" {
   vpc_security_group_ids = [aws_security_group.rds_sg.id]
   db_subnet_group_name   = aws_db_subnet_group.default.name
 
-  tags = {
-    Name = "MyPostgresDB"
-  }
+  tags = { Name = "MyPostgresDB" }
 }
-
