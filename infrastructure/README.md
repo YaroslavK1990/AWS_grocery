@@ -19,5 +19,3 @@ infrastructure/
 │── outputs.tf
 
 ```
-
-![imagen]https://github.com/YaroslavK1990/AWS_grocery/blob/version2/infrastructure/image/AWS%20Grocery%20Mate.drawio.png
