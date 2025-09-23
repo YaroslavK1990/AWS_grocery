@@ -7,7 +7,7 @@ The setup follows best practices with separate networking layers, compute, datab
 
 ## Project Diagrams
 
-![AWS infrastructure]https://github.com/YaroslavK1990/AWS_grocery/blob/version2/infrastructure/image/AWS%20infrastructure.png?raw=true
+![AWS infrastructure](https://github.com/YaroslavK1990/AWS_grocery/blob/version2/infrastructure/image/AWS%20infrastructure.png?raw=true)
 
 ## 📂 Project Structure
 
