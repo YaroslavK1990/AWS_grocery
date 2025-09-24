@@ -1,6 +1,6 @@
 # 🔷🔹Terraform Infrastructure for AWS Grocery App
 
-This repository contains the Infrastructure as Code (IaC) for GroceryMate, a modern e-commerce application for online grocery shopping. The project is developed as part of the Cloud Track program at Masterschool's Software Engineering Bootcamp, originally created by our mentor and tutor Alejandro Roman Ibanez.
+This repository contains the Infrastructure as Code (IaC) for GroceryMate, a modern e-commerce application for online grocery shopping. The project is developed as part of the Cloud Track program at Masterschool's Software Engineering Bootcamp, originally created by our mentor and tutor [Alejandro Roman Ibanez](https://github.com/AlejandroRomanIbanez/AWS_grocery).
 
 This project provisions a **production-ready AWS infrastructure** for the GroceryMate application using **Terraform**.  
 The setup follows best practices with separate networking layers, compute, database, and load balancing.
@@ -125,11 +125,7 @@ This setup includes:
 
 All resources are provided separately in each file, making the infrastructure **scalable, reusable, and easy to maintain**.
 
----
-
-## GroceryMate – Deployment & Installation Guide
-
----
+## 🔗 GroceryMate – Deployment & Installation Guide
 
 This guide explains how to set up and deploy the **GroceryMate** application on AWS using Terraform, PostgreSQL, and Docker.
 
@@ -299,4 +295,4 @@ Open in your browser:
 http://<EC2_PUBLIC_IP>:5000
 ```
 
-✅ Congratulations! Your GroceryMate application is now deployed and running.
+## ✅ Congratulations! Your GroceryMate application is now deployed and running.
