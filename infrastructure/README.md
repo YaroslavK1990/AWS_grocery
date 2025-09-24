@@ -29,8 +29,6 @@ infrastructure/
 
 ## 📦 Terraform Infrastructure
 
----
-
 ### 1. **VPC**
 
 - Provisions the **Virtual Private Cloud**.
@@ -40,8 +38,6 @@ infrastructure/
   - VPC ID
   - Public Subnet IDs
   - Private Subnet IDs
-
----
 
 ### 2. **Security Groups**
 
@@ -54,8 +50,6 @@ infrastructure/
   - EC2 SG ID
   - RDS SG ID
 
----
-
 ### 3. **Application Load Balancer (ALB)**
 
 - Deploys an **Application Load Balancer**.
@@ -65,8 +59,6 @@ infrastructure/
   - Port 443 (HTTPS)
 - **Health Checks** on `/health`.
 
----
-
 ### 4. **EC2**
 
 - Defines EC2 configuration:
@@ -75,8 +67,6 @@ infrastructure/
   - **IAM Instance Profile**.
   - **Security Group**.
   - **EBS Volume**: 20 GB (`gp3`).
-
----
 
 ### 5. **Auto Scaling Group (ASG)**
 
@@ -88,8 +78,6 @@ infrastructure/
   - Maximum: 4
 - Attaches EC2 instances to the ALB Target Group.
 
----
-
 ### 6. **IAM Role**
 
 - Creates an **IAM Role** for EC2 instances.
@@ -100,8 +88,6 @@ infrastructure/
 - **Outputs**:
   - IAM Role name
   - Instance Profile name
-
----
 
 ### 8. **RDS (PostgreSQL)**
 
@@ -116,8 +102,6 @@ infrastructure/
 - **Backups**: Restores database from a snapshot.
 - **Outputs**:
   - RDS Endpoint
-
----
 
 ### 9. **S3 Bucket**
 
@@ -144,6 +128,8 @@ This setup includes:
 
 All resources are provided separately in each file, making the infrastructure **scalable, reusable, and easy to maintain**.
 
+---
+
 ## GroceryMate – Deployment & Installation Guide
 
 This guide explains how to set up and deploy the **GroceryMate** application on AWS using Terraform, PostgreSQL, and Docker.
@@ -157,8 +143,6 @@ Before starting, ensure you have the following installed:
 - **Terraform** – Infrastructure as Code
 - **AWS CLI** – Manage AWS resources from your terminal
 
----
-
 ## Clone the Repository
 
 ```bash
@@ -166,8 +150,6 @@ git clone https://github.com/AlejandroRomanIbanez/AWS_grocery.git
 
 cd AWS_grocery
 ```
-
----
 
 ## AWS CLI Setup
 
@@ -183,8 +165,6 @@ Verify installation:
 aws --version
 ```
 
----
-
 ## Configure SSO Authentication
 
 ```bash
@@ -192,8 +172,6 @@ aws configure sso
 ```
 
 For more details: [AWS CLI SSO Configuration Guide](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sso.html)
-
----
 
 ## Login via SSO
 
@@ -209,8 +187,6 @@ aws sts get-caller-identity
 
 ⚠️ Since SSO credentials are temporary, you might need to re-authenticate with aws sso login periodically.
 
----
-
 ## Deploy Infrastructure with Terraform
 
 ```bash
@@ -222,15 +198,11 @@ terraform apply
 terraform destroy
 ```
 
----
-
 ## Connect to EC2 Instance
 
 ```bash
 ssh -i /path/to/your-key.pem ec2-user@<EC2_PUBLIC_IP>
 ```
-
----
 
 ## System Update & Essential Packages
 
@@ -250,8 +222,6 @@ pip --version
 psql --version
 ```
 
----
-
 ## PostgreSQL Configuration
 
 Create database and user:
@@ -269,8 +239,6 @@ psql -U grocery_user -d grocerymate_db -c "SELECT * FROM users;"
 psql -U grocery_user -d grocerymate_db -c "SELECT * FROM products;"
 ```
 
----
-
 ## Python Environment Setup
 
 Install dependencies:
@@ -280,8 +248,6 @@ cd backend
 pip install -r requirements.txt
 ```
 
----
-
 ## Environment Variables
 
 Generate a secure JWT key:
@@ -290,7 +256,7 @@ Generate a secure JWT key:
 python3 -c "import secrets; print(secrets.token_hex(32))"
 ```
 
-Create ```.env file:
+Create `.env` file:
 
 ```bash
 touch .env
@@ -306,8 +272,6 @@ echo "POSTGRES_DB=grocerymate_db" >> .env
 echo "POSTGRES_HOST=localhost" >> .env
 echo "POSTGRES_URI=postgresql://grocery_user:<your_secure_password>@localhost:5432/grocerymate_db" >> .env
 ```
-
----
 
 ## Run Application with Docker
 
@@ -327,8 +291,6 @@ docker run --network host \
   -e SECRET_KEY=<your_secret_key> \
   -p 5000:5000 grocerymate
 ```
-
----
 
 ## Access the Application
 
