@@ -24,7 +24,6 @@ infrastructure/
 │── sg.tf
 │── variables.tf
 │── vpc.tf
-
 ```
 
 ## 📦 Terraform Infrastructure
@@ -113,8 +112,6 @@ infrastructure/
 - **Permissions**:
   - EC2 instances have full access via IAM Role.
 
----
-
 ## ✅ Summary
 
 This setup includes:
@@ -131,6 +128,8 @@ All resources are provided separately in each file, making the infrastructure **
 ---
 
 ## GroceryMate – Deployment & Installation Guide
+
+---
 
 This guide explains how to set up and deploy the **GroceryMate** application on AWS using Terraform, PostgreSQL, and Docker.
 
