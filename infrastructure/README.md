@@ -1,4 +1,4 @@
-# Terraform Infrastructure for AWS Grocery App
+# 🔷🔹Terraform Infrastructure for AWS Grocery App
 
 This repository contains the Infrastructure as Code (IaC) for GroceryMate, a modern e-commerce application for online grocery shopping. The project is developed as part of the Cloud Track program at Masterschool's Software Engineering Bootcamp, originally created by our mentor and tutor Alejandro Roman Ibanez.
 
@@ -67,7 +67,7 @@ infrastructure/
 
 ---
 
-### 4. **EC2 Launch Template**
+### 4. **EC2**
 
 - Defines EC2 configuration:
   - **AMI**: Custom preconfigured with Docker & Docker Compose.
@@ -137,10 +137,205 @@ This setup includes:
 
 - **Networking (VPC + Subnets + IGW)**
 - **Security (Security Groups + IAM Roles)**
-- **Compute (EC2 + ASG + Launch Template)**
+- **Compute (EC2 + ASG)**
 - **Load Balancing (ALB)**
 - **Database (RDS PostgreSQL)**
 - **Storage (S3)**
-- **Monitoring (CloudWatch)**
 
 All resources are provided separately in each file, making the infrastructure **scalable, reusable, and easy to maintain**.
+
+## GroceryMate – Deployment & Installation Guide
+
+This guide explains how to set up and deploy the **GroceryMate** application on AWS using Terraform, PostgreSQL, and Docker.
+
+## Prerequisites
+
+Before starting, ensure you have the following installed:
+
+- **Python 3.11+** – Backend runtime
+- **PostgreSQL** – Database
+- **Terraform** – Infrastructure as Code
+- **AWS CLI** – Manage AWS resources from your terminal
+
+---
+
+## Clone the Repository
+
+```bash
+git clone https://github.com/AlejandroRomanIbanez/AWS_grocery.git
+
+cd AWS_grocery
+```
+
+---
+
+## AWS CLI Setup
+
+Install AWS CLI
+
+```bash
+brew install awscli
+```
+
+Verify installation:
+
+```bash
+aws --version
+```
+
+---
+
+## Configure SSO Authentication
+
+```bash
+aws configure sso
+```
+
+For more details: [AWS CLI SSO Configuration Guide](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sso.html)
+
+---
+
+## Login via SSO
+
+```bash
+aws sso login
+```
+
+Verify your identity:
+
+```bash
+aws sts get-caller-identity
+```
+
+⚠️ Since SSO credentials are temporary, you might need to re-authenticate with aws sso login periodically.
+
+---
+
+## Deploy Infrastructure with Terraform
+
+```bash
+cd infrastructure
+
+terraform init
+terraform plan
+terraform apply
+terraform destroy
+```
+
+---
+
+## Connect to EC2 Instance
+
+```bash
+ssh -i /path/to/your-key.pem ec2-user@<EC2_PUBLIC_IP>
+```
+
+---
+
+## System Update & Essential Packages
+
+Update system and install dependencies:
+
+```bash
+sudo yum update -y
+sudo yum install -y git python3 python3-pip postgresql15 postgresql15-server postgresql15-contrib
+```
+
+Verify installations:
+
+```bash
+git --version
+python3 --version
+pip --version
+psql --version
+```
+
+---
+
+## PostgreSQL Configuration
+
+Create database and user:
+
+```bash
+psql -U postgres -c "CREATE DATABASE grocerymate_db;"
+psql -U postgres -c "CREATE USER grocery_user WITH ENCRYPTED PASSWORD '<your_secure_password>';"
+psql -U postgres -c "ALTER USER grocery_user WITH SUPERUSER;"
+```
+
+Check tables:
+
+```bash
+psql -U grocery_user -d grocerymate_db -c "SELECT * FROM users;"
+psql -U grocery_user -d grocerymate_db -c "SELECT * FROM products;"
+```
+
+---
+
+## Python Environment Setup
+
+Install dependencies:
+
+```bash
+cd backend
+pip install -r requirements.txt
+```
+
+---
+
+## Environment Variables
+
+Generate a secure JWT key:
+
+```bash
+python3 -c "import secrets; print(secrets.token_hex(32))"
+```
+
+Create ```.env file:
+
+```bash
+touch .env
+```
+
+Fill in required variables:
+
+```bash
+echo "JWT_SECRET_KEY=<your_generated_key>" >> .env
+echo "POSTGRES_USER=grocery_user" >> .env
+echo "POSTGRES_PASSWORD=<your_secure_password>" >> .env
+echo "POSTGRES_DB=grocerymate_db" >> .env
+echo "POSTGRES_HOST=localhost" >> .env
+echo "POSTGRES_URI=postgresql://grocery_user:<your_secure_password>@localhost:5432/grocerymate_db" >> .env
+```
+
+---
+
+## Run Application with Docker
+
+Start the application (replace placeholders):
+
+```bash
+docker run --network host \
+  -e S3_BUCKET_NAME=<bucket_name> \
+  -e S3_REGION=<region_name> \
+  -e USE_S3_STORAGE=true \
+  -e POSTGRES_USER=grocery_user \
+  -e POSTGRES_PASSWORD=<your_secure_password> \
+  -e POSTGRES_DB=grocerymate_db \
+  -e POSTGRES_HOST=<rds-endpoint> \
+  -e POSTGRES_URI=postgresql://<psql_user>:<psql_password>@<rds-endpoint>:5432/<psql_db> \
+  -e JWT_SECRET_KEY=<your_secret_key> \
+  -e SECRET_KEY=<your_secret_key> \
+  -p 5000:5000 grocerymate
+```
+
+---
+
+## Access the Application
+
+Open in your browser:
+
+```bash
+http://<EC2_PUBLIC_IP>:5000
+```
+
+✅ Congratulations! Your GroceryMate application is now deployed and running.
