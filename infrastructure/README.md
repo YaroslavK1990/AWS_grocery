@@ -296,3 +296,18 @@ http://<EC2_PUBLIC_IP>:5000
 ```
 
 ## ✅ Congratulations! Your GroceryMate application is now deployed and running.
+
+## Auto Scaling Group **(optional)**
+
+The project includes a file **`asg.tf.disabled`**, which contains the configuration for an **Auto Scaling Group (ASG)**.  
+By default, this functionality is **not enabled**.
+
+If you want to enable the **Auto Scaling Group**:
+
+1. Rename the file from `asg.tf.disabled` to `asg.tf`.
+2. Review and adjust the parameters as needed (number of instances, instance type, scaling policies).
+3. Reapply the infrastructure:
+   ```bash
+   terraform init
+   terraform apply
+   ```
