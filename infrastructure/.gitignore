@@ -3,7 +3,8 @@
 *.tfstate
 *.tfstate.backup
 *.tfvars
-*.tfplan
+*.terraform.lock.hcl
+tfplan
 
 
 # SSH keys
