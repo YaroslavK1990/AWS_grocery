@@ -12,7 +12,7 @@ provider "aws" {
   region = var.aws_region
 }
 
-# EC2 INSTANCE
+# EC2 INSTANCE 
 resource "aws_instance" "grocerymate_ec2" {
   ami                    = var.ami_id
   instance_type          = var.ec2_instance_type
@@ -28,7 +28,7 @@ resource "aws_instance" "grocerymate_ec2" {
   depends_on = [aws_security_group.ec2_sg]
 }
 
-# LOAD BALANCER
+# LOAD BALANCER AND TARGET GROUP
 resource "aws_lb" "grocery_alb" {
   name               = "grocery-alb"
   internal           = false
@@ -75,7 +75,7 @@ resource "aws_lb_listener" "grocery_http" {
   }
 }
 
-# RDS
+# RDS POSTGRESQL DATABASE
 resource "aws_db_subnet_group" "default" {
   name       = "grocery-db-subnet-group"
   subnet_ids = [aws_subnet.private_a.id, aws_subnet.private_b.id]
